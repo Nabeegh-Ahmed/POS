@@ -54,9 +54,15 @@ func (item *Item) GetItems(offset, limit int, db *gorm.DB) ([]Item, error) {
 	return items, err
 }
 
-func (item *Item) GetItemByName(name string, db *gorm.DB) (*Item, error) {
-	err := db.Debug().Model(&Item{}).Where("name = ?", name).Take(&item).Error
+func (item *Item) GetItem(id string, db *gorm.DB) (*Item, error) {
+	err := db.Debug().Model(&Item{}).Where("id = ?", id).Take(&item).Error
 	return item, err
+}
+
+func (item *Item) GetItemsByName(name string, db *gorm.DB) ([]Item, error) {
+	var items []Item
+	err := db.Debug().Model(&Item{}).Find(&items).Where("name like ?", "%"+name+"%").Error
+	return items, err
 }
 
 func (item *Item) GetItemByBarcode(barcode string, db *gorm.DB) (*Item, error) {
@@ -64,21 +70,21 @@ func (item *Item) GetItemByBarcode(barcode string, db *gorm.DB) (*Item, error) {
 	return item, err
 }
 
-func (item *Item) UpdateItem(itemData Item, db *gorm.DB) (*Item, error) {
+func (item *Item) UpdateItem(db *gorm.DB) (*Item, error) {
 	updateItem := make(map[string]interface{})
-	if itemData.Name != "" {
-		updateItem["Name"] = itemData.Name
+	if item.Name != "" {
+		updateItem["Name"] = item.Name
 	}
-	if itemData.Price != 0 {
-		updateItem["Price"] = itemData.Price
+	if item.Price != 0 {
+		updateItem["Price"] = item.Price
 	}
-	if itemData.Cost != 0 {
-		updateItem["Cost"] = itemData.Cost
+	if item.Cost != 0 {
+		updateItem["Cost"] = item.Cost
 	}
-	if itemData.Barcode != "" {
-		updateItem["Barcode"] = itemData.Barcode
+	if item.Barcode != "" {
+		updateItem["Barcode"] = item.Barcode
 	}
 
-	err := db.Debug().Model(&Item{}).Where("id = ?", itemData.ID).Updates(itemData).Error
+	err := db.Debug().Model(&Item{}).Where("id = ?", item.ID).Updates(item).Take(&item).Error
 	return item, err
 }

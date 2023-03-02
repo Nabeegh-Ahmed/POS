@@ -60,15 +60,14 @@ func (collection *Collection) GetCollection(id string, db *gorm.DB) (*Collection
 	return collection, err
 }
 
-func (collection *Collection) UpdateCollection(collectionData Collection, db *gorm.DB) (*Collection, error) {
-	updateCollection := make(map[string]string)
-	if collectionData.Name != "" {
-		updateCollection["name"] = collectionData.Name
+func (collection *Collection) UpdateCollection(db *gorm.DB) (*Collection, error) {
+	updateCollection := make(map[string]interface{})
+	if collection.Name != "" {
+		updateCollection["name"] = collection.Name
 	}
-	if collectionData.Description != "" {
-		updateCollection["description"] = collectionData.Description
+	if collection.Description != "" {
+		updateCollection["description"] = collection.Description
 	}
-
-	err := db.Debug().Model(&Collection{}).Where("id = ?", collection.ID).Updates(updateCollection).Error
+	err := db.Debug().Model(&Collection{}).Preload("Items").Where("id = ?", collection.ID).Updates(updateCollection).Take(&collection).Error
 	return collection, err
 }

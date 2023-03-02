@@ -70,7 +70,29 @@ func (server *Server) GetCollections(res http.ResponseWriter, req *http.Request)
 }
 
 func (server *Server) UpdateCollection(res http.ResponseWriter, req *http.Request) {
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Println(err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		return
+	}
+	// Unmarshal the body into a payload
+	collection := models.Collection{}
+	err = json.Unmarshal(body, &collection)
+	if err != nil {
+		fmt.Println(err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		return
+	}
+	fmt.Println("Here")
+	_, err = collection.UpdateCollection(server.db)
+	if err != nil {
+		fmt.Println(err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		return
+	}
 
+	responses.JSON(res, http.StatusOK, map[string]interface{}{"collection": collection})
 }
 
 func (server *Server) GetCollection(res http.ResponseWriter, req *http.Request) {
